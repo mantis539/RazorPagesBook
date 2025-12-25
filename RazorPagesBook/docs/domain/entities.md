@@ -4,7 +4,7 @@
 - Author
 - Genre
 - Price
-- vRating
+- Rating
 - CoverPath
 - Reviews
 
