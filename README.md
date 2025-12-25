@@ -24,13 +24,13 @@
 
 Проєкт надає стандартизований REST API.
 
-* **Специфікація:** [openapi.yaml](RazorPagesBook.RazorPagesBook/docs/api/openapi.yaml)
+* **Специфікація:** [openapi.yaml](RazorPagesBook/docs/api/openapi.yaml)
 * **Стандарт:** OpenAPI 3.0.3
 
 ### Візуалізація Swagger
 Нижче наведено інтерфейс документації, що описує всі ендпоїнти, включаючи перевірку стану системи (`/health`):
 
-![Swagger UI Screenshot](RazorPagesBook.RazorPagesBook/docs/api/swagger_screenshot.png)
+![Swagger UI Screenshot](RazorPagesBook/docs/api/swagger_screenshot.png)
 
 ---
 
