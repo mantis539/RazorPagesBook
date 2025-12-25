@@ -21,3 +21,7 @@
 | `GET` | `/api/books/{id}` | Детальна інформація про книгу |
 | `DELETE` | `/api/books/{id}` | Видалення книги (тільки для Admin) |
 | `GET` | `/health` | Перевірка стану системи (повертає JSON з таймаутом 1с) |
+
+
+Для перевірки докера було відкрито командний рядок та вписано команду docker run hello-world, після чого крмандеий рядок показав такий результат:
+![hello-world](RazorPagesBook/RazorPagesBook/wwwroots/uploads/books/docker.png)
