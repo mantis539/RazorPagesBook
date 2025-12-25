@@ -1,0 +1,87 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Головна";
+}
+
+<div class="p-5 mb-4 bg-dark text-white rounded-3 shadow" style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center;">
+    <div class="container-fluid py-5 text-center">
+        <h1 class="display-4 fw-bold">Твоя наступна улюблена книга тут</h1>
+        <p class="fs-4">Шукай найкращі видання, читай чесні відгуки та ділися своїми враженнями.</p>
+        <a asp-page="/Catalog/Index" class="btn btn-primary btn-lg px-4 shadow">Перейти до каталогу</a>
+    </div>
+</div>
+
+<div class="container">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"> Новинки в каталозі</h2>
+        <a asp-page="/Catalog/Index" class="text-decoration-none">Дивитися всі &rarr;</a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
+        @foreach (var book in Model.NewestBooks)
+        {
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm transition-hover">
+                    <img src="@(string.IsNullOrEmpty(book.CoverPath) ? "/images/no-cover.png" : book.CoverPath)"
+                         class="card-img-top shadow-sm" alt="@book.Title"
+                         style="height: 300px; object-fit: cover; border-radius: 8px;">
+                    <div class="card-body px-0">
+                        <h5 class="card-title fw-bold text-truncate">@book.Title</h5>
+                        <p class="card-text text-muted mb-1">@book.Author</p>
+                        <div class="text-warning mb-2">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                <i class="bi bi-star-fill @(i < book.Rating ? "" : "text-secondary opacity-25")"></i>
+                            }
+                            <span class="text-dark ms-1 small">(@book.Rating/5)</span>
+                        </div>
+                        <a asp-page="/Catalog/Details" asp-route-id="@book.Id" class="btn btn-outline-dark btn-sm w-100">Детальніше</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    
+    <div class="bg-light p-5 rounded-4 shadow-sm border mb-5">
+        <h3 class="text-center fw-bold mb-4">Що кажуть наші читачі</h3>
+        <div class="row">
+            @foreach (var review in Model.RecentReviews)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="mb-2">
+                                @for (int i = 0; i < 5; i++)
+                                {
+                                    <small class="bi bi-star-fill text-warning @(i < review.Rating ? "" : "text-muted opacity-25")"></small>
+                                }
+                            </div>
+                            <p class="fst-italic text-muted">"@review.Comment"</p>
+                            <hr>
+                            <div class="d-flex align-items-center">
+                                <div class="ms-2">
+                                    <p class="mb-0 fw-bold small">@review.ReviewerName</p>
+                                    <small class="text-primary">про книгу "@review.Book?.Title"</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-hover:hover {
+        transform: translateY(-5px);
+        transition: transform 0.3s ease;
+    }
+
+    .bi-star-fill {
+        margin-right: 2px;
+    }
+</style>

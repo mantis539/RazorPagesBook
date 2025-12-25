@@ -1,0 +1,67 @@
+﻿@page "{id:int}"
+@model RazorPagesBook.Pages.Admin.Books.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Book</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Book.Id" />
+            <div class="form-group">
+                <label asp-for="Book.Title" class="control-label"></label>
+                <input asp-for="Book.Title" class="form-control" />
+                <span asp-validation-for="Book.Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Book.Author" class="control-label"></label>
+                <input asp-for="Book.Author" class="form-control" />
+                <span asp-validation-for="Book.Author" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Book.Genre" class="control-label"></label>
+                <input asp-for="Book.Genre" class="form-control" />
+                <span asp-validation-for="Book.Genre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Book.Price" class="control-label"></label>
+                <input asp-for="Book.Price" class="form-control" />
+                <span asp-validation-for="Book.Price" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Book.Rating" class="control-label"></label>
+                <input asp-for="Book.Rating" class="form-control" />
+                <span asp-validation-for="Book.Rating" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="form-label d-block">Поточна обкладинка</label>
+                <img src="@(string.IsNullOrEmpty(Model.Book.CoverPath) ?
+                     Url.Content("~/images/placeholder-cover.svg") : Url.Content(Model.Book.CoverPath))"
+                     class="img-fluid rounded border" style="max-width:200px; object-fit:cover; aspect-ratio:2/3;" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Змінити обкладинку (jpg/png/webp, до 2 МБ)</label>
+                <input asp-for="CoverFile" type="file" class="form-control"
+                       accept=".jpg,.jpeg,.png,.webp" />
+                <span class="text-danger" asp-validation-for="CoverFile"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Зберегти" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Назад до списку</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

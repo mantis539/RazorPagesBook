@@ -1,0 +1,92 @@
+﻿@page
+@model RazorPagesBook.Pages.Admin.Reviews.IndexModel
+@{
+    ViewData["Title"] = "Відгуки (адмін)";
+}
+
+
+<h1 class="mb-3">@ViewData["Title"]</h1>
+
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-12 col-md-6">
+        <label for="q" class="form-label">Пошук</label>
+        <input id="q" name="q" value="@Model.q" class="form-control" placeholder="Назва книги, автор або текст відгуку" />
+    </div>
+    <div class="col-6 col-md-3 form-check mt-4">
+        <input class="form-check-input" type="checkbox" id="onlyUnreplied" name="onlyUnreplied" value="true" @(Model.onlyUnreplied ? "checked" : "") />
+        <label class="form-check-label" for="onlyUnreplied">Лише без відповіді</label>
+    </div>
+    <div class="col-6 col-md-3 mt-4">
+        <button class="btn btn-primary w-100">Фільтр</button>
+    </div>
+</form>
+
+
+@if (Model.Items.Count == 0)
+{
+    <div class="alert alert-info">Відгуків не знайдено.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Книга</th>
+                    <th>Автор</th>
+                    <th>Оц.</th>
+                    <th>Коментар</th>
+                    <th>Відповідь адміна</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var it in Model.Items)
+                {
+                    <tr>
+                        <td><small class="text-muted">@it.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</small></td>
+                        <td>@it.BookTitle</td>
+                        <td>@it.ReviewerName</td>
+                        <td>@it.Rating</td>
+                        <td style="max-width:320px;">
+                            @if (!string.IsNullOrWhiteSpace(it.Comment))
+                            {
+                                @it.Comment
+                            }
+                            else
+                            {
+
+
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+                        <td style="max-width:320px;">
+                            @if (!string.IsNullOrWhiteSpace(it.AdminReply))
+                            {
+                                <div>@it.AdminReply</div>
+                                <div class="text-muted small">
+                                    @if (it.AdminRepliedAt != null)
+                                    {
+                                        @($"відповідь: {it.AdminRepliedAt.Value.ToLocalTime():yyyy-MM-dd HH:mm}")
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-warning">Немає відповіді</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary"
+                               asp-page="./Reply" asp-route-id="@it.ReviewId">
+                                @(string.IsNullOrWhiteSpace(it.AdminReply) ? "Відповісти" : "Редагувати")
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

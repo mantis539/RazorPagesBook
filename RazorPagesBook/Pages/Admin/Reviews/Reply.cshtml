@@ -1,0 +1,58 @@
+﻿@page "{id:int}"
+@model RazorPagesMovie.Pages.Admin.Reviews.ReplyModel
+@{
+    ViewData["Title"] = "Відповідь на відгук";
+}
+
+
+<a asp-page="./Index" class="btn btn-link ps-0">&larr; До списку</a>
+
+
+<h1 class="mb-3">@ViewData["Title"]</h1>
+
+
+@if (Model.Review is null)
+{
+    <div class="alert alert-danger">Відгук не знайдено.</div>
+}
+else
+{
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <div class="mb-2"><strong>Книга:</strong> @Model.BookTitle</div>
+            <div class="mb-2"><strong>Автор:</strong> @(Model.Review.ReviewerName ?? "Користувач")</div>
+            <div class="mb-2"><strong>Оцінка:</strong> @Model.Review.Rating</div>
+            <div class="mb-2"><strong>Коментар:</strong> @(!string.IsNullOrWhiteSpace(Model.Review.Comment) ? Model.Review.Comment : "—")</div>
+            <div class="text-muted small">Створено: @(Model.Review.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))</div>
+        </div>
+    </div>
+
+
+    <form method="post" class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="mb-3">
+                <label asp-for="Input.AdminReply" class="form-label"></label>
+                <textarea asp-for="Input.AdminReply" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Input.AdminReply" class="text-danger"></span>
+            </div>
+
+
+            <button class="btn btn-primary" type="submit">Зберегти відповідь</button>
+            <a class="btn btn-outline-secondary" asp-page="./Index">Скасувати</a>
+
+
+            @if (!string.IsNullOrWhiteSpace(Model.Review.AdminReply))
+            {
+                <button class="btn btn-outline-danger ms-2" type="submit"
+                        onclick="document.getElementById('Input_AdminReply').value='';">
+                    Очистити відповідь
+                </button>
+            }
+        </div>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

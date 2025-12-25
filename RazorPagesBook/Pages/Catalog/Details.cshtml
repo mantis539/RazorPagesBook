@@ -1,0 +1,137 @@
+﻿@page "{id:int}"
+@model RazorPagesBook.Pages.Catalog.DetailsModel
+@{
+    ViewData["Title"] = Model.Book?.Title ?? "Книга";
+}
+
+<a asp-page="./Index" class="btn btn-link ps-0">&larr; До каталогу</a>
+
+<div class="row g-4 align-items-start">
+    @* Блок зображення *@
+    <div class="col-12 col-md-4 col-lg-3">
+        <img src="@(string.IsNullOrEmpty(Model.Book?.CoverPath) ? Url.Content("~/images/placeholder-poster.svg") : Url.Content(Model.Book!.CoverPath))"
+             alt="Постер @Model.Book?.Title"
+             class="img-fluid rounded shadow-sm"
+             style="object-fit:cover; aspect-ratio:2/3;" />
+    </div>
+
+    @* Блок інформації *@
+    <div class="col">
+        <h1 class="mb-2">@Model.Book?.Title</h1>
+        <div class="text-muted mb-3">@Model.Book?.Genre</div>
+
+        <dl class="row">
+            @if (Model.Book?.GetType().GetProperty("Price") != null)
+            {
+                <dt class="col-sm-3">Ціна</dt>
+                <dd class="col-sm-9">@((Model.Book as dynamic).Price?.ToString("C"))</dd>
+            }
+
+            @if (Model.Book?.GetType().GetProperty("Rating") != null)
+            {
+                <dt class="col-sm-3">Рейтинг (текст)</dt>
+                <dd class="col-sm-9">@((Model.Book as dynamic).Rating)</dd>
+            }
+        </dl>
+
+        <hr class="my-4" />
+
+        <h3 class="mb-3">Відгуки</h3>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form method="post" asp-page-handler="SaveReview" class="mb-4">
+                <input type="hidden" name="id" value="@Model.id" />
+
+                <div class="mb-2">
+                    <label class="form-label">Ваша оцінка</label>
+                    <div class="d-flex gap-2">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="rate-@i" name="MyRating" value="@i" @(Model.MyRating == i ? "checked" : "") />
+                                <label class="form-check-label" for="rate-@i">@i</label>
+                            </div>
+                        }
+                    </div>
+                    <span class="text-danger" asp-validation-for="MyRating"></span>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label" for="MyComment">Коментар (необов’язково)</label>
+                    <textarea id="MyComment" name="MyComment" class="form-control" rows="3">@Model.MyComment</textarea>
+                </div>
+
+                <button class="btn btn-primary">Зберегти відгук</button>
+            </form>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <a asp-area="Identity" asp-page="/Account/Login" asp-route-ReturnUrl="@Url.Page("./Details", new { id = Model.id })">Увійдіть</a>, щоб залишити відгук.
+            </div>
+        }
+
+        @if (Model.ReviewsCount == 0)
+        {
+            <div class="text-muted">Ще немає відгуків.</div>
+        }
+        else
+        {
+            <div class="list-group">
+                @foreach (var r in Model.Reviews)
+                {
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>@(string.IsNullOrWhiteSpace(r.ReviewerName) ? "Користувач" : r.ReviewerName)</strong>
+                                <span class="ms-2 text-warning">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <span>@(i <= r.Rating ? "★" : "☆")</span>
+                                    }
+                                </span>
+                            </div>
+                            <small class="text-muted">
+                                @((r.UpdatedAt ?? r.CreatedAt).ToLocalTime().ToString("yyyy-MM-dd HH:mm"))
+                            </small>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(r.Comment))
+                        {
+                            <div class="mt-2 text-dark">@r.Comment</div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(r.AdminReply))
+                        {
+                            <div class="mt-3 p-3 rounded border bg-light">
+                                <div class="fw-semibold mb-1">Відповідь адміністратора</div>
+                                <div>@r.AdminReply</div>
+                                <div class="text-muted small mt-1">
+                                    @(string.IsNullOrWhiteSpace(r.AdminReplyBy) ? "Адміністратор" : r.AdminReplyBy)
+                                    @if (r.AdminRepliedAt != null)
+                                    {
+                                        @($" • {r.AdminRepliedAt.Value.ToLocalTime():yyyy-MM-dd HH:mm}")
+                                    }
+                                </div>
+                            </div>
+                        }
+
+
+                        @if ((User.Identity?.IsAuthenticated ?? false) && (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == r.UserId))
+                        {
+                            <form method="post" asp-page-handler="DeleteReview" class="mt-2">
+                                <input type="hidden" name="reviewId" value="@r.Id" />
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Видалити</button>
+                            </form>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

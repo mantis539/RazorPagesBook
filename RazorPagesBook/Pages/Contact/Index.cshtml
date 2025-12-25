@@ -1,0 +1,83 @@
+﻿@page
+@model RazorPagesBook.Pages.Contact.IndexModel
+@{
+    ViewData["Title"] = "Контактна інформація";
+}
+
+
+<h1 class="mb-3">@ViewData["Title"]</h1>
+
+
+<div class="row g-4">
+    <div class="col-12 col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Як з нами зв’язатися</h5>
+                <p class="mb-1"><strong>Ел. пошта:</strong> <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a></p>
+                <p class="mb-0"><strong>Телефон:</strong> @Model.Phone</p>
+                <hr />
+                <p class="text-muted small mb-0">
+                    Заповніть форму — і ми відповімо на ваш запит якнайшвидше.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col">
+        @if (!string.IsNullOrEmpty(Model.OkMessage))
+        {
+            <div class="alert alert-success">@Model.OkMessage</div>
+        }
+
+
+        <form method="post" class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+                <div class="mb-3">
+                    <label asp-for="Input.Name" class="form-label"></label>
+                    <input asp-for="Input.Name" class="form-control" />
+                    <span asp-validation-for="Input.Name" class="text-danger"></span>
+                </div>
+
+
+                <div class="mb-3">
+                    <label asp-for="Input.Email" class="form-label"></label>
+                    <input asp-for="Input.Email" class="form-control" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+
+
+                <div class="mb-3">
+                    <label asp-for="Input.Subject" class="form-label"></label>
+                    <input asp-for="Input.Subject" class="form-control" />
+                    <span asp-validation-for="Input.Subject" class="text-danger"></span>
+                </div>
+
+
+                <div class="mb-3">
+                    <label asp-for="Input.Message" class="form-label"></label>
+                    <textarea asp-for="Input.Message" class="form-control" rows="5"></textarea>
+                    <span asp-validation-for="Input.Message" class="text-danger"></span>
+                </div>
+
+
+                @* Honeypot — прихована для людей, видима для ботів *@
+                <div style="position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden;">
+                    <label for="Website">Ваш вебсайт (залиште порожнім)</label>
+                    <input name="Input.Website" id="Website" type="text" tabindex="-1" autocomplete="off" />
+                </div>
+
+
+                <button class="btn btn-primary" type="submit">Надіслати</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

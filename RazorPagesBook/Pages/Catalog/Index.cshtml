@@ -1,0 +1,76 @@
+﻿@page
+@model RazorPagesBook.Pages.Catalog.IndexModel
+@{
+    ViewData["Title"] = "Книжковий каталог";
+}
+
+<h1 class="mb-3">@ViewData["Title"]</h1>
+
+<form method="get" class="row g-2 mb-3 align-items-end">
+    <div class="col-12 col-sm-6 col-md-5">
+        <label for="q" class="form-label">Пошук за назвою</label>
+        <input id="q" asp-for="q" class="form-control" placeholder="Напр., Dune" />
+    </div>
+
+    <div class="col-12 col-sm-4 col-md-3">
+        <label for="genre" class="form-label">Жанр</label>
+        <select id="genre" asp-for="genre" asp-items="Model.GenreOptions" class="form-select">
+            <option value="">Усі жанри</option>
+        </select>
+    </div>
+
+    <div class="col-12 col-sm-2 col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Фільтрувати</button>
+    </div>
+
+    <div class="col-12 col-md-2">
+        <a class="btn btn-outline-secondary w-100" asp-page="./Index">Скинути</a>
+    </div>
+</form>
+
+@if (Model.Books.Count == 0)
+{
+    <div class="alert alert-info">Нічого не знайдено.</div>
+}
+else
+{
+    <div class="text-muted small mb-2">
+        Знайдено: <strong>@Model.Books.Count</strong>
+        @if (!string.IsNullOrWhiteSpace(Model.genre))
+        {
+            <span> • Жанр: <strong>@Model.genre</strong></span>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.q))
+        {
+            <span> • Пошук: <strong>@Model.q</strong></span>
+        }
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        @foreach (var m in Model.Books)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="@(string.IsNullOrEmpty(m.CoverPath) ? Url.Content("~/images/placeholder-cover.svg") :
+                         Url.Content(m.CoverPath))"
+                         class="card-img-top"
+                         alt="Постер @m.Title"
+                         style="object-fit:cover; aspect-ratio:2/3;" />
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title mb-1">@m.Title</h5>
+                        <div class="text-muted small">@m.Genre</div>
+
+                        <div class="mt-1 fw-semibold text-primary">
+                            Ціна: @m.Price.ToString("C")
+                        </div>
+
+                        <div class="mt-auto pt-2">
+                            <a class="stretched-link" asp-page="./Details" asp-route-id="@m.Id">Детальніше</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

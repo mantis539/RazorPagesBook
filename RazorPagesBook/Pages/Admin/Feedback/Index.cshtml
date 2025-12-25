@@ -1,0 +1,75 @@
+﻿@page
+@model RazorPagesBook.Pages.Admin.Feedback.IndexModel
+@{
+    ViewData["Title"] = "Звернення (адмін)";
+}
+<h1 class="mb-3">@ViewData["Title"]</h1>
+
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-12 col-md-6">
+        <label class="form-label" for="q">Пошук</label>
+        <input id="q" name="q" value="@Model.q" class="form-control" placeholder="Ім’я, email, тема або текст" />
+    </div>
+    <div class="col-6 col-md-3 form-check mt-4">
+        <input class="form-check-input" type="checkbox" id="onlyUnreplied" name="onlyUnreplied" value="true" @(Model.onlyUnreplied ? "checked" : "") />
+        <label class="form-check-label" for="onlyUnreplied">Лише без відповіді</label>
+    </div>
+    <div class="col-6 col-md-3 mt-4">
+        <button class="btn btn-primary w-100">Фільтр</button>
+    </div>
+</form>
+
+
+@if (Model.Items.Count == 0)
+{
+    <div class="alert alert-info">Нічого не знайдено.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Від</th>
+                    <th>Email</th>
+                    <th>Тема</th>
+                    <th>Повідомлення</th>
+                    <th>Статус</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var it in Model.Items)
+                {
+                    <tr>
+                        <td><small class="text-muted">@it.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</small></td>
+                        <td>@it.Name</td>
+                        <td><a href="mailto:@it.Email">@it.Email</a></td>
+                        <td>@it.Subject</td>
+                        <td style="max-width:360px">@it.Message</td>
+                        <td>
+                            @if (it.Replied)
+                            {
+                                <span class="badge text-bg-success">Відповіли</span>
+                            }
+                            else
+                            {
+
+
+                                <span class="badge text-bg-warning">Без відповіді</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-page="./Reply" asp-route-id="@it.Id">
+                                @(it.Replied ? "Переглянути/відповісти" : "Відповісти")
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
