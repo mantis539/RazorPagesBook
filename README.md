@@ -24,4 +24,4 @@
 
 
 Для перевірки докера було відкрито командний рядок та вписано команду docker run hello-world, після чого крмандеий рядок показав такий результат:
-![hello-world](RazorPagesBook/RazorPagesBook/wwwroots/uploads/books/docker.png)
+![hello-world](RazorPagesBook/wwwroot/uploads/books/docker.png)
