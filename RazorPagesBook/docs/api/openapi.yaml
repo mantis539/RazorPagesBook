@@ -1,33 +1,42 @@
 openapi: 3.0.3
 info:
   title: RazorPagesBook API
-  description: API для керування каталогом книг та читацькими відгуками в системі RazorPagesBook.
-  version: 1.0.0
+  description: |
+    API для системи RazorPagesBook. 
+    Включає підтримку DTO для передачі даних та стандартизований формат помилок.
+  version: 1.1.0
+
 servers:
   - url: https://localhost:7000
     description: Локальний сервер розробки
 
+tags:
+  - name: Books
+    description: Керування каталогом книг
+  - name: Reviews
+    description: Керування відгуками користувачів
+
 paths:
   /api/books:
     get:
-      summary: Отримати список усіх книг
-      tags:
-        - Books
+      summary: Отримати всі книги (з використанням BookDTO)
+      tags: [Books]
       responses:
         '200':
-          description: Успішне отримання списку
+          description: Список книг успішно отримано
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Book'
+                  $ref: '#/components/schemas/BookDTO'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /api/books/{id}:
     get:
       summary: Отримати детальну інформацію про книгу
-      tags:
-        - Books
+      tags: [Books]
       parameters:
         - name: id
           in: path
@@ -36,71 +45,148 @@ paths:
             type: integer
       responses:
         '200':
-          description: Дані книги знайдені
+          description: Книгу знайдено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Book'
+                $ref: '#/components/schemas/BookDTO'
         '404':
-          description: Книгу не знайдено
+          $ref: '#/components/responses/NotFound'
 
-  /api/reviews:
-    post:
-      summary: Додати новий відгук до книги
-      tags:
-        - Reviews
+    put:
+      summary: Повне оновлення книги (Заміна)
+      tags: [Books]
       security:
         - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReviewCreate'
+              $ref: '#/components/schemas/BookUpdateDTO'
       responses:
-        '201':
-          description: Відгук успішно створено
-        '401':
-          description: Користувач не авторизований
+        '204':
+          description: Книгу успішно оновлено
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Часткове оновлення книги
+      description: Дозволяє оновити лише окремі поля (наприклад, тільки рейтинг)
+      tags: [Books]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookUpdateDTO'
+      responses:
+        '200':
+          description: Поля успішно оновлені
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Видалення книги
+      tags: [Books]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Книгу видалено
+        '403':
+          description: Недостатньо прав (тільки для Admin)
+        '404':
+          $ref: '#/components/responses/NotFound'
 
 components:
   schemas:
-    Book:
+    # --- DTO Schemas ---
+    BookDTO:
       type: object
       properties:
         id:
           type: integer
-          example: 1
         title:
           type: string
-          example: "Дюна"
         author:
           type: string
-          example: "Френк Герберт"
         rating:
           type: integer
-          minimum: 1
-          maximum: 5
-          example: 5
+        reviewCount:
+          type: integer
+          description: Кількість відгуків (агреговане поле DTO)
 
-    ReviewCreate:
+    BookUpdateDTO:
       type: object
-      required:
-        - bookId
-        - comment
-        - rating
       properties:
-        bookId:
-          type: integer
-          example: 1
-        comment:
+        title:
           type: string
-          example: "Неймовірна книга, дуже рекомендую!"
+        author:
+          type: string
         rating:
           type: integer
           minimum: 1
           maximum: 5
-          example: 5
+
+    # --- Error Schema ---
+    ErrorResponse:
+      type: object
+      properties:
+        traceId:
+          type: string
+          description: Унікальний ID запиту для логів
+        message:
+          type: string
+          description: Короткий опис помилки
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Детальний список помилок валідації (Dictionary)
+
+  responses:
+    NotFound:
+      description: Ресурс не знайдено
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ValidationError:
+      description: Помилка валідації даних
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Внутрішня помилка сервера
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
 
   securitySchemes:
     BearerAuth:
