@@ -2,14 +2,14 @@
 
 Проєкт надає стандартизований REST API для взаємодії з каталогом книг та системою відгуків.
 
-* **Специфікація:** [openapi.yaml](.RazorPagesBook/docs/api/openapi.yaml) — повний опис контрактів, моделей даних (DTO) та статусів відповідей.
+* **Специфікація:** [openapi.yaml](RazorPagesBook/docs/api/openapi.yaml) — повний опис контрактів, моделей даних (DTO) та статусів відповідей.
 * **Стандарт:** OpenAPI 3.0.3.
 * **Обробка помилок:** API повертає уніфікований формат помилок із `requestId` для кореляції запитів.
 
 ### Візуалізація інтерфейсу Swagger
 Нижче наведено скріншот документації, згенерованої на основі нашого контракту:
 
-![Swagger UI Screenshot](.RazorPagesBook/docs/api/swagger_screenshot.png)
+![Swagger UI Screenshot](RazorPagesBook/docs/api/swagger_screenshot.png)
 
 ---
 
