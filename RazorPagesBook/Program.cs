@@ -30,7 +30,21 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireAdministratorRole", policy => policy.RequireRole("Admin"));
 });
 
+builder.Services.AddMemoryCache();
+
 var app = builder.Build();
+
+app.MapGet("/health", async (HttpContext context) => {
+    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+    try
+    {
+        return Results.Ok(new { status = "ok" });
+    }
+    catch (OperationCanceledException)
+    {
+        return Results.StatusCode(503);
+    }
+});
 
 using (var scope = app.Services.CreateScope())
 {
@@ -53,6 +67,30 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+app.Use(async (context, next) => {
+    var requestId = Guid.NewGuid().ToString();
+    
+    context.Response.Headers["X-Request-Id"] = requestId;
+    await next();
+});
+
+
+app.UseExceptionHandler(errorApp => {
+    errorApp.Run(async context => {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        var requestId = context.Response.Headers["X-Request-Id"];
+
+        await context.Response.WriteAsJsonAsync(new
+        {
+            error = "Internal Server Error",
+            code = 500,
+            requestId = requestId.ToString()
+        });
+    });
+});
+
 app.MapRazorPages().WithStaticAssets();
 
 using (var scope = app.Services.CreateScope())

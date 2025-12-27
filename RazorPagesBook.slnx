@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="BookApp.Tests/BookApp.Tests.csproj" Id="3fa9088a-bd19-45fc-88ff-fd8ccfe510f3" />
   <Project Path="RazorPagesBook/RazorPagesBook.csproj" />
 </Solution>

@@ -11,17 +11,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 namespace RazorPagesBook.Pages.Admin.Books
 {
     public class CreateModel : PageModel
     {
         private readonly RazorPagesBook.Data.RazorPagesBookContext _context;
         private readonly IWebHostEnvironment _env;
-        public CreateModel(RazorPagesBookContext context, IWebHostEnvironment env) 
+        private readonly IMemoryCache _cache;
+        public CreateModel(RazorPagesBookContext context, IWebHostEnvironment env, IMemoryCache cache) 
 
         {
             _context = context;
             _env = env;
+            _cache = cache;
         }
         public IActionResult OnGet()
         {
@@ -34,6 +37,8 @@ namespace RazorPagesBook.Pages.Admin.Books
         public IFormFile? CoverFile { get; set; }
         private static readonly string[] _permitted = { ".jpg", ".jpeg", ".png", ".webp" };
         private const long _maxSize = 2 * 1024 * 1024;
+
+
         
         public async Task<IActionResult> OnPostAsync()
         {

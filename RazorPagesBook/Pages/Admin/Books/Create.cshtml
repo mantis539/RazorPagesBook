@@ -11,9 +11,12 @@
 
 <div class="row">
     <div class="col-md-6">
-        @* Збільшив колонку для кращого вигляду *@
-        <form method="post" enctype="multipart/form-data">
+        @* Об'єднана форма з ID та enctype для файлів *@
+        <form id="createBookForm" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @* Ключ ідемпотентності *@
+            <input type="hidden" id="IdempotencyKey" name="IdempotencyKey" value="@Guid.NewGuid()" />
 
             <div class="form-group mb-3">
                 <label asp-for="Book.Title" class="control-label"></label>
@@ -47,16 +50,21 @@
 
             <div class="form-group mb-4">
                 <label class="form-label fw-bold">Обкладинка (jpg/png/webp, до 2 МБ)</label>
-                <input asp-for="CoverFile" type="file" class="form-control"
-                       accept=".jpg,.jpeg,.png,.webp" />
+                <input asp-for="CoverFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
                 <span class="text-danger" asp-validation-for="CoverFile"></span>
             </div>
 
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                @* ID кнопки для JS *@
+                <button type="submit" id="submitBtn" class="btn btn-primary">Create</button>
                 <a asp-page="Index" class="btn btn-outline-secondary ms-2">Back to List</a>
             </div>
         </form>
+
+        @* Банер перевантаження *@
+        <div id="overloadBanner" class="alert alert-danger" style="display:none; margin-top:20px;">
+            Сервер перевантажений (Timeout). Спробуйте ще раз через кілька секунд.
+        </div>
     </div>
 </div>
 
@@ -64,4 +72,70 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        document.getElementById('createBookForm').addEventListener('submit', async function (e) {
+            if (!$(this).valid()) return;
+
+            e.preventDefault();
+
+            const btn = document.getElementById('submitBtn');
+            const banner = document.getElementById('overloadBanner');
+            const formData = new FormData(this);
+
+            btn.disabled = true;
+            banner.style.display = 'none';
+
+            async function sendRequest(retries = 3, delay = 500) {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 1000); // Таймаут 1с за завданням
+
+                try {
+                    // Додаємо Anti-Forgery Token (потрібен для Razor Pages POST запитів через fetch)
+                    const verificationToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                    const response = await fetch(window.location.href, {
+                        method: 'POST',
+                        body: formData,
+                        signal: controller.signal,
+                        headers: {
+                            'X-Request-Id': crypto.randomUUID(),
+                            'Idempotency-Key': document.getElementById('IdempotencyKey').value,
+                            'RequestVerificationToken': verificationToken
+                        }
+                    });
+
+                    clearTimeout(timeout);
+
+                    if (response.ok) {
+                        // Якщо сервер повернув редірект або успіх
+                        window.location.href = '@Url.Page("Index")';
+                        return;
+                    }
+
+                    // Обробка 429 (Rate Limit) або 5xx (Server Error)
+                    if (response.status === 429 || (response.status >= 500 && retries > 0)) {
+                        const retryAfter = response.headers.get('Retry-After') || delay / 1000;
+                        console.warn(`Помилка ${response.status}. Ретрай через ${retryAfter}с...`);
+                        await new Promise(r => setTimeout(r, retryAfter * 1000));
+                        return sendRequest(retries - 1, delay * 2);
+                    }
+
+                    throw new Error("Помилка сервера");
+
+                } catch (err) {
+                    if (err.name === 'AbortError' || retries === 0) {
+                        banner.style.display = 'block';
+                        btn.disabled = false; // Дозволяємо спробувати пізніше
+                        console.error("Degraded mode activated: Timeout or Max retries reached");
+                    } else {
+                        await new Promise(r => setTimeout(r, delay));
+                        return sendRequest(retries - 1, delay * 2);
+                    }
+                }
+            }
+
+            await sendRequest();
+        });
+    </script>
 }

@@ -25,7 +25,7 @@ namespace RazorPagesBook.Models
 
 
         [StringLength(450)]
-        public string? UserId { get; set; }    // якщо користувач залогінений
+        public string? UserId { get; set; }   
 
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
