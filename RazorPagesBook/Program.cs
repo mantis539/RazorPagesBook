@@ -46,6 +46,7 @@ app.MapGet("/health", async (HttpContext context) => {
     }
 });
 
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
